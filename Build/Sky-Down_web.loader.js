@@ -528,8 +528,7 @@ function createUnityInstance(t, n, d) {
     };
 
     async function fetchChunkedData(onProgress) {
-
-        let chunkCount = 20; // change to your actual number
+        let chunkCount = 6; // change to your actual number
 
         let buffers = [];
         let totalLength = 0;
@@ -648,6 +647,11 @@ function createUnityInstance(t, n, d) {
             m.addRunDependency("dataUrl"), fetchChunkedData(function(e) {
                                                 T("dataUrl", e);
                                             }).then(function(t) {//a.then(function(t) {
+
+                console.log(
+                    new TextDecoder().decode(t.slice(0,100))
+                );
+
                 var e = new TextDecoder("utf-8"),
                     n = 0;
 
