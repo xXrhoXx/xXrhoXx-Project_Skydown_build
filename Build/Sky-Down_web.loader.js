@@ -528,7 +528,7 @@ function createUnityInstance(t, n, d) {
     };
 
     async function fetchChunkedData(onProgress) {
-        let chunkCount = 6; // change to your actual number
+        let chunkCount = 5; // change to your actual number
 
         let buffers = [];
         let totalLength = 0;
