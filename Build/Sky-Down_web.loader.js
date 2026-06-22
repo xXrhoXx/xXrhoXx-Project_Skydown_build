@@ -527,52 +527,30 @@ function createUnityInstance(t, n, d) {
         }
     };
 
-    async function fetchChunkedData(onProgress) {
-        let chunkCount = 5; // change to your actual number
+    async function fetchChunkedData() {
+        const manifest = await fetch("Build/game.data.manifest.json").then(r => r.json());
 
-        let buffers = [];
-        let totalLength = 0;
+        const chunks = new Array(manifest.totalChunks);
+        let totalSize = 0;
 
-        for (let i = 0; i < chunkCount; i++) {
+        for (let i = 0; i < manifest.totalChunks; i++) {
+            const url = `${manifest.filePrefix}${String(i + 1).padStart(manifest.padding, "0")}`;
 
-            let filename =
-                "Build/game.part." + i.toString().padStart(3, '0');
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Missing chunk: " + url);
 
-            let response = await fetch(filename);
-
-            if (!response.ok)
-                throw new Error("Failed to fetch " + filename);
-
-            let buffer = await response.arrayBuffer();
-
-            buffers.push(new Uint8Array(buffer));
-            totalLength += buffer.byteLength;
-
-            if (onProgress)
-                onProgress({
-                    type: "progress",
-                    loaded: i + 1,
-                    total: chunkCount,
-                    lengthComputable: true
-                });
+            const buf = new Uint8Array(await res.arrayBuffer());
+            chunks[i] = buf;
+            totalSize += buf.length;
         }
 
-        let merged = new Uint8Array(totalLength);
+        const merged = new Uint8Array(totalSize);
 
         let offset = 0;
-
-        for (let b of buffers) {
-            merged.set(b, offset);
-            offset += b.length;
+        for (const c of chunks) {
+            merged.set(c, offset);
+            offset += c.length;
         }
-
-        if (onProgress)
-            onProgress({
-                type: "load",
-                loaded: totalLength,
-                total: totalLength,
-                lengthComputable: true
-            });
 
         return merged;
     }
